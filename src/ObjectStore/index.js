@@ -118,6 +118,26 @@ export class ObjectStore {
   }
 
   /**
+   * @param {import("../types").StoredObject[]} objects
+   * @returns {Promise<void>}
+   */
+  async putAll(objects) {
+    const db = await this.instance;
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction(ObjectStore.#store, "readwrite");
+      const store = transaction.objectStore(ObjectStore.#store);
+
+      for (const object of objects) {
+        store.put(object);
+      }
+
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () =>
+        reject(new Error(`{offdex} ObjectStore.putAll: ${transaction.error}`));
+    });
+  }
+
+  /**
    * @param {import("../StorageQuery/index.js").StorageQuery | ((object: import("../types").StoredObject) => boolean)} queryOrPredicate
    * @param {(propertyName: string, oldValue: any, newValue: any) => void | boolean} [onSetEvent]
    * @param {(propertyName: string, deletedValue: any) => void | boolean} [onDeleteEvent]
