@@ -1,0 +1,35 @@
+{
+  "name": "offdex",
+  "version": "1.0.2",
+  "description": "ID-driven object storage wrapper for IndexedDB with zero schema/versioning overhead. Shared across all browser threads, offline-persistent, large capacity, simple API.",
+  "keywords": [
+    "indexeddb",
+    "offline",
+    "storage",
+    "browser-storage",
+    "web-storage",
+    "object-store",
+    "key-value",
+    "id",
+    "persist",
+    "threads",
+    "workers",
+    "shared"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "main": "src/index.js",
+  "types": "src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "import": "./src/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "src",
+    "README.md"
+  ],
+  "sideEffects": false
+}
