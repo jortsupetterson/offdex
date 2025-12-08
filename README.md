@@ -33,18 +33,25 @@ await storage.delete(profile.id);
 
 ## API
 ### `storage`
-- Ready-to-use singleton instance shared across every import in the same origin.
-- Uses the `offline` database and `objects` store under the hood.
+- Ready-to-use singleton instance shared across every import in the same origin. Uses the `offdex` database and `objects` store under the hood.
 
-### `class OfflineStorage`
-- `constructor()` — opens (or creates) the `offline` database with the `objects` store. Use this only if you need a separate instance.
+### `class ObjectStore`
+- `constructor()` — opens (or creates) the `offdex` database with the `objects` store. Use this only if you need a separate instance.
 - `put(object: { id: UUIDv4 } & Record<string, unknown>): Promise<void>` — upserts an object keyed by `id`.
-- `get(id: UUIDv4): Promise<{ id: UUIDv4 } & Record<string, unknown> | undefined>` — fetches by `id`, returning `undefined` when missing.
+- `get(id: UUIDv4, onSet?, onDelete?): Promise<{ id: UUIDv4 } & Record<string, unknown> | undefined>` — fetches by `id`, returning `undefined` when missing. Optional callbacks run before a property change/delete; return `false` to block the change.
 - `delete(id: UUIDv4): Promise<void>` — removes an object by `id`.
+- `getAllMatches(queryOrFilter: StorageQuery | (object) => boolean, onSet?, onDelete?): Promise<object[]>` — returns objects that pass a query or predicate (with the same optional callbacks as `get`).
+- `deleteAllMatches(queryOrFilter: StorageQuery | (object) => boolean): Promise<void>` — deletes objects that pass a query or predicate.
+
+### Other exports
+- `StorageQuery` — helper for simple equality-based queries.
+- `ObservableValue` — observable wrapper around a single value.
+- `ObservableObject` — wraps an object in observable values keyed by its properties.
 
 ### Types
 - `UUIDv4` — template literal type for UUID strings.
 - `StoredObject` — `{ id: UUIDv4 } & Record<string, unknown>`.
+- `OnSetHandler`, `OnDeleteHandler` — callback shapes used by `get`/`getAllMatches`.
 
 ## Notes
 - Runs in any environment that exposes `indexedDB` (secure contexts in modern browsers).
