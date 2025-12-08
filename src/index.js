@@ -79,3 +79,5 @@ export class OfflineStorage {
     });
   }
 }
+
+export const storage = new OfflineStorage();

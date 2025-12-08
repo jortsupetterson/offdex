@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Offdex</title>
     <script type="module">
-      import { OfflineStorage } from "./src/index.js";
+      import { storage, OfflineStorage } from "./src/index.js";
+      globalThis.storage = storage;
       globalThis.OfflineStorage = OfflineStorage;
     </script>
   </head>

@@ -17,3 +17,5 @@ export class OfflineStorage {
    */
   delete(id: UUIDv4): Promise<void>;
 }
+
+export const storage: OfflineStorage;
