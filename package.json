@@ -1,6 +1,6 @@
 {
   "name": "offdex",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "ID-driven object storage wrapper for IndexedDB with zero schema/versioning overhead. Shared across all browser threads, offline-persistent, large capacity, simple API.",
   "keywords": [
     "indexeddb",
