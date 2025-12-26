@@ -1,7 +1,7 @@
 {
   "name": "offdex",
-  "version": "1.0.7",
-  "description": "ID-driven object storage wrapper for IndexedDB with zero schema/versioning overhead. Shared across all browser threads, offline-persistent, large capacity, simple API.",
+  "version": "2.0.0",
+  "description": "Minimal, unbiased IndexedDB object-store wrapper keyed by a string. Shared across browser threads, offline-persistent, simple API.",
   "keywords": [
     "indexeddb",
     "offline",
@@ -10,16 +10,25 @@
     "web-storage",
     "object-store",
     "key-value",
-    "id",
+    "key",
     "persist",
     "threads",
     "workers",
-    "shared"
+    "shared",
+    "minimal"
   ],
   "license": "MIT",
   "type": "module",
   "main": "src/index.js",
   "types": "src/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jortsupetterson/offdex.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jortsupetterson/offdex/issues"
+  },
+  "homepage": "https://github.com/jortsupetterson/offdex#readme",
   "exports": {
     ".": {
       "types": "./src/index.d.ts",
@@ -29,6 +38,7 @@
   },
   "files": [
     "src",
+    "LICENSE",
     "README.md"
   ],
   "sideEffects": false

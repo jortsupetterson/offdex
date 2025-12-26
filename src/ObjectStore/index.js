@@ -12,7 +12,7 @@ export class ObjectStore {
       request.addEventListener("upgradeneeded", () => {
         const db = request.result;
         if (!db.objectStoreNames.contains(ObjectStore.#store)) {
-          db.createObjectStore(ObjectStore.#store, { keyPath: "id" });
+          db.createObjectStore(ObjectStore.#store, { keyPath: "key" });
         }
       });
 
@@ -48,19 +48,16 @@ export class ObjectStore {
   }
 
   /**
-   * @param {import("../types").UUIDv4} id
-   * @param {(propertyName: string, oldValue: any, newValue: any) => void | boolean} [onSetEvent]
-   * @param {(propertyName: string, deletedValue: any) => void | boolean} [onDeleteEvent]
+   * @param {string} key
    * @returns {Promise<import("../types").StoredObject | undefined>}
    */
-  async get(id, onSetEvent, onDeleteEvent) {
+  async get(key) {
     const db = await this.instance;
-    const objectStoreInstance = this;
 
     return new Promise((resolve, reject) => {
       const transaction = db.transaction(ObjectStore.#store, "readonly");
       const store = transaction.objectStore(ObjectStore.#store);
-      const request = store.get(id);
+      const request = store.get(key);
 
       transaction.oncomplete = () => {
         if (!request.result) {
@@ -68,32 +65,7 @@ export class ObjectStore {
           return;
         }
 
-        const target = request.result;
-
-        const handler = {
-          set(targetObject, propertyName, newValue) {
-            const oldValue = targetObject[propertyName];
-            if (onSetEvent) {
-              const shouldUpdate = onSetEvent(propertyName, oldValue, newValue);
-              if (shouldUpdate === false) return true;
-            }
-            targetObject[propertyName] = newValue;
-            void objectStoreInstance.put(targetObject);
-            return true;
-          },
-          deleteProperty(targetObject, propertyName) {
-            const deletedValue = targetObject[propertyName];
-            if (onDeleteEvent) {
-              const shouldDelete = onDeleteEvent(propertyName, deletedValue);
-              if (shouldDelete === false) return true;
-            }
-            delete targetObject[propertyName];
-            void objectStoreInstance.put(targetObject);
-            return true;
-          },
-        };
-
-        resolve(new Proxy(target, handler));
+        resolve(request.result);
       };
 
       transaction.onerror = () =>
@@ -102,15 +74,15 @@ export class ObjectStore {
   }
 
   /**
-   * @param {import("../types").UUIDv4} id
+   * @param {string} key
    * @returns {Promise<void>}
    */
-  async delete(id) {
+  async delete(key) {
     const db = await this.instance;
     return new Promise((resolve, reject) => {
       const transaction = db.transaction(ObjectStore.#store, "readwrite");
       const store = transaction.objectStore(ObjectStore.#store);
-      store.delete(id);
+      store.delete(key);
       transaction.oncomplete = () => resolve();
       transaction.onerror = () =>
         reject(new Error(`{offdex} ObjectStore: ${transaction.error}`));
@@ -139,11 +111,9 @@ export class ObjectStore {
 
   /**
    * @param {import("../StorageQuery/index.js").StorageQuery | ((object: import("../types").StoredObject) => boolean)} queryOrPredicate
-   * @param {(propertyName: string, oldValue: any, newValue: any) => void | boolean} [onSetEvent]
-   * @param {(propertyName: string, deletedValue: any) => void | boolean} [onDeleteEvent]
    * @returns {Promise<import("../types").StoredObject[]>}
    */
-  async getAllMatches(queryOrPredicate, onSetEvent, onDeleteEvent) {
+  async getAllMatches(queryOrPredicate) {
     const db = await this.instance;
     const objectStoreInstance = this;
 
@@ -166,34 +136,7 @@ export class ObjectStore {
         const value = cursor.value;
 
         if (predicate(value)) {
-          const handler = {
-            set(targetObject, propertyName, newValue) {
-              const oldValue = targetObject[propertyName];
-              if (onSetEvent) {
-                const shouldUpdate = onSetEvent(
-                  propertyName,
-                  oldValue,
-                  newValue
-                );
-                if (shouldUpdate === false) return true;
-              }
-              targetObject[propertyName] = newValue;
-              void objectStoreInstance.put(targetObject);
-              return true;
-            },
-            deleteProperty(targetObject, propertyName) {
-              const deletedValue = targetObject[propertyName];
-              if (onDeleteEvent) {
-                const shouldDelete = onDeleteEvent(propertyName, deletedValue);
-                if (shouldDelete === false) return true;
-              }
-              delete targetObject[propertyName];
-              void objectStoreInstance.put(targetObject);
-              return true;
-            },
-          };
-
-          results.push(new Proxy(value, handler));
+          results.push(value);
         }
 
         cursor.continue();

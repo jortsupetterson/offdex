@@ -1,10 +1,11 @@
 # Offdex
 
-ID-first object storage for the browser. Offdex wraps IndexedDB with a tiny, stable API so you can drop in `{ id: <uuid>, ...data }` objects and have them shared across tabs, workers, and sessions without thinking about schema versions.
+Keyed object storage for the browser. Offdex wraps IndexedDB with a tiny, unbiased API so you can drop in `{ key: "<string>", ...data }` objects and have them shared across tabs, workers, and sessions without thinking about schema versions.
 
 ## Why use Offdex
 
-- Zero schema/versioning overhead: one object store keyed by `id`, no migrations to manage.
+- Zero schema/versioning overhead: one object store keyed by `key`, no migrations to manage.
+- Minimal wrapper: no hooks or proxies in the storage API, just data in and data out.
 - Works everywhere IndexedDB works: tabs, workers, and other browser runtimes share the same underlying database.
 - Offline by default: IndexedDB persists across reloads and disconnects.
 - Typed surface: ships with TypeScript definitions for easy adoption.
@@ -21,17 +22,17 @@ npm install offdex
 import { storage } from "offdex";
 
 const profile = {
-  id: crypto.randomUUID(), // UUIDv4 string
+  key: "profile:ada",
   name: "Ada Lovelace",
   role: "analyst",
 };
 
 await storage.put(profile);
 
-const again = await storage.get(profile.id);
-// -> { id: "…", name: "Ada Lovelace", role: "analyst" }
+const again = await storage.get(profile.key);
+// -> { key: "profile:ada", name: "Ada Lovelace", role: "analyst" }
 
-await storage.delete(profile.id);
+await storage.delete(profile.key);
 ```
 
 ## API
@@ -43,10 +44,11 @@ await storage.delete(profile.id);
 ### `class ObjectStore`
 
 - `constructor()` — opens (or creates) the `offdex` database with the `objects` store. Use this only if you need a separate instance.
-- `put(object: { id: UUIDv4 } & Record<string, unknown>): Promise<void>` — upserts an object keyed by `id`.
-- `get(id: UUIDv4, onSet?, onDelete?): Promise<{ id: UUIDv4 } & Record<string, unknown> | undefined>` — fetches by `id`, returning `undefined` when missing. Optional callbacks run before a property change/delete; return `false` to block the change.
-- `delete(id: UUIDv4): Promise<void>` — removes an object by `id`.
-- `getAllMatches(queryOrFilter: StorageQuery | (object) => boolean, onSet?, onDelete?): Promise<object[]>` — returns objects that pass a query or predicate (with the same optional callbacks as `get`).
+- `put(object: { key: string } & Record<string, unknown>): Promise<void>` - upserts an object keyed by `key`.
+- `putAll(objects: { key: string } & Record<string, unknown>[]): Promise<void>` - upserts multiple objects in a single transaction.
+- `get(key: string): Promise<{ key: string } & Record<string, unknown> | undefined>` - fetches by `key`, returning `undefined` when missing.
+- `delete(key: string): Promise<void>` - removes an object by `key`.
+- `getAllMatches(queryOrFilter: StorageQuery | (object) => boolean): Promise<object[]>` - returns objects that pass a query or predicate.
 - `deleteAllMatches(queryOrFilter: StorageQuery | (object) => boolean): Promise<void>` — deletes objects that pass a query or predicate.
 
 ### Other exports
@@ -57,9 +59,7 @@ await storage.delete(profile.id);
 
 ### Types
 
-- `UUIDv4` — template literal type for UUID strings.
-- `StoredObject` — `{ id: UUIDv4 } & Record<string, unknown>`.
-- `OnSetHandler`, `OnDeleteHandler` — callback shapes used by `get`/`getAllMatches`.
+- `StoredObject` - `{ key: string } & Record<string, unknown>`.
 
 ## Notes
 

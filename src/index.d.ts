@@ -1,17 +1,4 @@
-export type UUIDv4 = `${string}-${string}-${string}-${string}-${string}`;
-
-export type StoredObject = { id: UUIDv4 } & Record<string, unknown>;
-
-export type OnSetHandler = (
-  propertyName: string,
-  oldValue: unknown,
-  newValue: unknown
-) => void | boolean;
-
-export type OnDeleteHandler = (
-  propertyName: string,
-  deletedValue: unknown
-) => void | boolean;
+export type StoredObject = { key: string } & Record<string, unknown>;
 
 export class StorageQuery {
   constructor(args?: Record<string, unknown>);
@@ -35,16 +22,11 @@ export class ObservableObject<T extends StoredObject = StoredObject> {
 export class ObjectStore {
   constructor();
   put(object: StoredObject): Promise<void>;
-  get(
-    id: UUIDv4,
-    onSetEvent?: OnSetHandler,
-    onDeleteEvent?: OnDeleteHandler
-  ): Promise<StoredObject | undefined>;
-  delete(id: UUIDv4): Promise<void>;
+  get(key: string): Promise<StoredObject | undefined>;
+  delete(key: string): Promise<void>;
+  putAll(objects: StoredObject[]): Promise<void>;
   getAllMatches(
-    queryOrFilter: StorageQuery | ((object: StoredObject) => boolean),
-    onSetEvent?: OnSetHandler,
-    onDeleteEvent?: OnDeleteHandler
+    queryOrFilter: StorageQuery | ((object: StoredObject) => boolean)
   ): Promise<StoredObject[]>;
   deleteAllMatches(
     queryOrFilter: StorageQuery | ((object: StoredObject) => boolean)
